@@ -45,7 +45,7 @@ export const sections: Section[] = [
   {
     id: "ai",
     name: "AI",
-    description: "AI helpers — coming soon.",
+    description: "AI-powered helpers that run on your terms — no login, no ads.",
   },
 ];
 
@@ -161,6 +161,16 @@ export const tools: Tool[] = [
     keywords: ["case", "upper", "lower", "camel", "snake", "kebab", "text"],
     ready: true,
     tag: "case styles",
+  },
+  // ai
+  {
+    id: "prompt-enhancer",
+    name: "Prompt Enhancer",
+    section: "ai",
+    description: "Enhance AI prompts with frameworks, design systems, models, and agents.",
+    keywords: ["prompt", "enhance", "ai", "framework", "design", "system", "model", "agent"],
+    ready: true,
+    tag: "ai enhancer",
   },
 ];
 

@@ -1,4 +1,15 @@
 # Cloudflare Pages configuration for OmTools
 # Deploy with: wrangler pages deploy dist
-# The SPA fallback to /index.html is handled by Cloudflare Pages'
-# `_redirects` file, which is generated at build time (see scripts below).
+#
+# Set the AI key as a secret:
+#   wrangler pages secret put AI_API_KEY
+#
+# Optional vars below can be overridden in the dashboard.
+
+name = "omtools"
+pages_build_output_dir = "dist"
+compatibility_date = "2025-06-01"
+
+[vars]
+AI_BASE_URL = "https://api.openai.com/v1"
+AI_MODEL = "gpt-4o-mini"

@@ -12,6 +12,7 @@ import { JsonFormat } from "../tools/JsonFormat";
 import { UrlEncode } from "../tools/UrlEncode";
 import { WordCount } from "../tools/WordCount";
 import { CaseConvert } from "../tools/CaseConvert";
+import { PromptEnhancer } from "../tools/PromptEnhancer";
 
 const components: Record<string, React.ComponentType> = {
   "image-compress": ImageCompress,
@@ -26,6 +27,7 @@ const components: Record<string, React.ComponentType> = {
   "url-encode": UrlEncode,
   "word-count": WordCount,
   "case-convert": CaseConvert,
+  "prompt-enhancer": PromptEnhancer,
 };
 
 export function ToolRoute() {

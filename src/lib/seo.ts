@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { sections, tools, type Tool } from "./registry";
+import { sections, tools, type Tool } from "./registry.ts";
 
 /** Set document title + meta description for the current page. */
 export function useSeo(title: string, description: string) {
