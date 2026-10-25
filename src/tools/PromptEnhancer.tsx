@@ -110,11 +110,12 @@ export function PromptEnhancer() {
       const data = (await response.json()) as EnhanceResult;
       if (!data.enhancedPrompt) throw new Error("Empty response");
       setResult(data);
-    } catch {
+    } catch (err) {
       setResult({
         enhancedPrompt: localEnhance(payload),
         original: prompt,
         fallback: true,
+        error: err instanceof Error ? `Could not reach /api/ai: ${err.message}` : "Could not reach /api/ai.",
       });
     } finally {
       setLoading(false);
@@ -225,6 +226,9 @@ export function PromptEnhancer() {
                     placeholder="https://api.example.com/v1"
                     spellCheck={false}
                   />
+                  <p className="pe-hint">
+                    OpenAI-compatible base URL, including <code className="mono">/v1</code>. The request goes to <code className="mono">{'{base}'}/chat/completions</code>.
+                  </p>
                 </div>
                 <div className="pe-field">
                   <span className="pe-label mono">Custom model name</span>
@@ -278,13 +282,22 @@ export function PromptEnhancer() {
           <div className="pe-result">
             <div className="pe-result-head">
               <span className="mono result-meta">
-                {result.fallback ? "enhanced locally" : "enhanced with AI"}
+                {result.fallback
+                  ? result.error
+                    ? "failed · fell back to local"
+                    : "enhanced locally"
+                  : "enhanced with AI"}
               </span>
               <button type="button" className="btn btn-sm" onClick={copy}>
                 {copied ? "Copied" : "Copy"}
               </button>
             </div>
             <pre className="pe-result-text mono">{result.enhancedPrompt}</pre>
+            {result.error ? (
+              <p className="pe-error mono">
+                ⚠ {result.error}
+              </p>
+            ) : null}
             <p className="pe-hint">
               Paste this into your AI tool. Set <code className="mono">AI_API_KEY</code> on the server for
               model-powered enhancement.

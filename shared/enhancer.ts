@@ -24,6 +24,8 @@ export interface EnhanceResult {
   enhancedPrompt: string;
   original: string;
   fallback: boolean;
+  /** Error message when a custom provider call failed (for debugging). */
+  error?: string;
 }
 
 export interface Option {
@@ -417,7 +419,12 @@ export async function enhancePrompt(
   if (isCustom) {
     // Custom provider: requires the user's own API key + base URL
     if (!requestedUrl || !requestedKey) {
-      return { enhancedPrompt: localEnhance(input), original, fallback: true };
+      return {
+        enhancedPrompt: localEnhance(input),
+        original,
+        fallback: true,
+        error: "Custom provider requires both a base URL and an API key.",
+      };
     }
     apiKey = requestedKey;
     baseUrl = requestedUrl.replace(/\/+$/, "");
@@ -429,7 +436,12 @@ export async function enhancePrompt(
     // Server default: use server env vars
     const serverKey = env.AI_API_KEY || env.OPENAI_API_KEY || "";
     if (!serverKey) {
-      return { enhancedPrompt: localEnhance(input), original, fallback: true };
+      return {
+        enhancedPrompt: localEnhance(input),
+        original,
+        fallback: true,
+        error: "No server API key configured (AI_API_KEY).",
+      };
     }
     apiKey = serverKey;
     baseUrl = (env.AI_BASE_URL || "https://api.openai.com/v1").replace(/\/+$/, "");
@@ -456,7 +468,13 @@ export async function enhancePrompt(
     });
 
     if (!response.ok) {
-      return { enhancedPrompt: localEnhance(input), original, fallback: true };
+      const errText = await response.text().catch(() => "");
+      return {
+        enhancedPrompt: localEnhance(input),
+        original,
+        fallback: true,
+        error: `Provider returned ${response.status}: ${errText.slice(0, 200)}`,
+      };
     }
 
     const data = (await response.json()) as {
@@ -464,10 +482,20 @@ export async function enhancePrompt(
     };
     const text = data.choices?.[0]?.message?.content;
     if (!text || !text.trim()) {
-      return { enhancedPrompt: localEnhance(input), original, fallback: true };
+      return {
+        enhancedPrompt: localEnhance(input),
+        original,
+        fallback: true,
+        error: "Provider returned an empty response.",
+      };
     }
     return { enhancedPrompt: text.trim(), original, fallback: false };
-  } catch {
-    return { enhancedPrompt: localEnhance(input), original, fallback: true };
+  } catch (err) {
+    return {
+      enhancedPrompt: localEnhance(input),
+      original,
+      fallback: true,
+      error: err instanceof Error ? err.message : "Network error",
+    };
   }
 }

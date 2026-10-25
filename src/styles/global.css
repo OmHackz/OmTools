@@ -873,3 +873,19 @@ input[type="file"] {
   flex-direction: column;
   gap: 12px;
 }
+.pe-result-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.pe-error {
+  color: var(--red);
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--red) 30%, var(--border));
+  background: color-mix(in srgb, var(--red) 8%, var(--bg-soft));
+}
