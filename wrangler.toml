@@ -1,0 +1,4 @@
+# Cloudflare Pages configuration for OmTools
+# Deploy with: wrangler pages deploy dist
+# The SPA fallback to /index.html is handled by Cloudflare Pages'
+# `_redirects` file, which is generated at build time (see scripts below).
