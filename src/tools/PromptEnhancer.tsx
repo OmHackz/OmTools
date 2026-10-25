@@ -101,18 +101,6 @@ export function PromptEnhancer() {
       enhancerApiKey,
     };
 
-    // "Server default" → local enhancement only, no /api/ai round-trip.
-    if (enhancerModel === "default") {
-      setResult({
-        enhancedPrompt: localEnhance(payload),
-        original: prompt,
-        fallback: false,
-        source: "local",
-      });
-      setLoading(false);
-      return;
-    }
-
     try {
       const response = await fetch("/api/ai", {
         method: "POST",
@@ -225,7 +213,7 @@ export function PromptEnhancer() {
                 ))}
               </select>
               <p className="pe-hint">
-                "Server default" enhances locally (no server call). "Custom provider" calls your API with your key.
+                "Server default" uses the server's configured AI (AI_API_KEY env). "Custom provider" uses your own key.
               </p>
             </div>
 
@@ -296,11 +284,11 @@ export function PromptEnhancer() {
           <div className="pe-result">
             <div className="pe-result-head">
               <span className="mono result-meta">
-                {result.fallback && result.error
+                {result.error
                   ? "failed · fell back to local"
                   : result.source === "ai"
                     ? "enhanced with AI"
-                    : "enhanced (built-in)"}
+                    : "enhanced locally"}
               </span>
               <button type="button" className="btn btn-sm" onClick={copy}>
                 {copied ? "Copied" : "Copy"}
@@ -311,14 +299,13 @@ export function PromptEnhancer() {
               <p className="pe-error mono">
                 ⚠ {result.error}
               </p>
-            ) : null}
-            {result.source === "ai" ? (
+            ) : result.source === "ai" ? (
               <p className="pe-hint">
-                Enhanced via your custom provider. Paste this into your AI tool.
+                Enhanced via AI. Paste this into your AI tool.
               </p>
             ) : (
               <p className="pe-hint">
-                Enhanced with the built-in enhancer (no API call). Switch to "Custom provider" for model-powered results.
+                Enhanced locally. Set <code className="mono">AI_API_KEY</code> on the server or use a custom provider for AI-powered results.
               </p>
             )}
           </div>
