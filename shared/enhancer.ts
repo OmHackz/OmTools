@@ -26,6 +26,8 @@ export interface EnhanceResult {
   fallback: boolean;
   /** Error message when a custom provider call failed (for debugging). */
   error?: string;
+  /** Where the enhancement came from. */
+  source?: "local" | "ai";
 }
 
 export interface Option {
@@ -423,6 +425,7 @@ export async function enhancePrompt(
         enhancedPrompt: localEnhance(input),
         original,
         fallback: true,
+        source: "local",
         error: "Custom provider requires both a base URL and an API key.",
       };
     }
@@ -440,6 +443,7 @@ export async function enhancePrompt(
         enhancedPrompt: localEnhance(input),
         original,
         fallback: true,
+        source: "local",
         error: "No server API key configured (AI_API_KEY).",
       };
     }
@@ -473,6 +477,7 @@ export async function enhancePrompt(
         enhancedPrompt: localEnhance(input),
         original,
         fallback: true,
+        source: "local",
         error: `Provider returned ${response.status}: ${errText.slice(0, 200)}`,
       };
     }
@@ -486,15 +491,17 @@ export async function enhancePrompt(
         enhancedPrompt: localEnhance(input),
         original,
         fallback: true,
+        source: "local",
         error: "Provider returned an empty response.",
       };
     }
-    return { enhancedPrompt: text.trim(), original, fallback: false };
+    return { enhancedPrompt: text.trim(), original, fallback: false, source: "ai" };
   } catch (err) {
     return {
       enhancedPrompt: localEnhance(input),
       original,
       fallback: true,
+      source: "local",
       error: err instanceof Error ? err.message : "Network error",
     };
   }

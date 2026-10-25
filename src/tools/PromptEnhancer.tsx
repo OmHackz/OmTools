@@ -100,6 +100,19 @@ export function PromptEnhancer() {
       enhancerBaseUrl,
       enhancerApiKey,
     };
+
+    // "Server default" → local enhancement only, no /api/ai round-trip.
+    if (enhancerModel === "default") {
+      setResult({
+        enhancedPrompt: localEnhance(payload),
+        original: prompt,
+        fallback: false,
+        source: "local",
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch("/api/ai", {
         method: "POST",
@@ -115,6 +128,7 @@ export function PromptEnhancer() {
         enhancedPrompt: localEnhance(payload),
         original: prompt,
         fallback: true,
+        source: "local",
         error: err instanceof Error ? `Could not reach /api/ai: ${err.message}` : "Could not reach /api/ai.",
       });
     } finally {
@@ -211,7 +225,7 @@ export function PromptEnhancer() {
                 ))}
               </select>
               <p className="pe-hint">
-                "Server default" uses the server's configured AI. "Custom provider" requires your own base URL, model name, and API key.
+                "Server default" enhances locally (no server call). "Custom provider" calls your API with your key.
               </p>
             </div>
 
@@ -282,11 +296,11 @@ export function PromptEnhancer() {
           <div className="pe-result">
             <div className="pe-result-head">
               <span className="mono result-meta">
-                {result.fallback
-                  ? result.error
-                    ? "failed · fell back to local"
-                    : "enhanced locally"
-                  : "enhanced with AI"}
+                {result.fallback && result.error
+                  ? "failed · fell back to local"
+                  : result.source === "ai"
+                    ? "enhanced with AI"
+                    : "enhanced (built-in)"}
               </span>
               <button type="button" className="btn btn-sm" onClick={copy}>
                 {copied ? "Copied" : "Copy"}
@@ -298,10 +312,15 @@ export function PromptEnhancer() {
                 ⚠ {result.error}
               </p>
             ) : null}
-            <p className="pe-hint">
-              Paste this into your AI tool. Set <code className="mono">AI_API_KEY</code> on the server for
-              model-powered enhancement.
-            </p>
+            {result.source === "ai" ? (
+              <p className="pe-hint">
+                Enhanced via your custom provider. Paste this into your AI tool.
+              </p>
+            ) : (
+              <p className="pe-hint">
+                Enhanced with the built-in enhancer (no API call). Switch to "Custom provider" for model-powered results.
+              </p>
+            )}
           </div>
         ) : null}
       </div>
