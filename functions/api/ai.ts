@@ -12,7 +12,7 @@
 import {
   enhancePrompt,
   type EnhanceOptions,
-} from "../../shared/enhancer";
+} from "../../api/_lib/enhancer";
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {

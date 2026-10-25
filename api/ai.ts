@@ -5,7 +5,7 @@
  * project's environment variables. Without a key the endpoint falls back
  * to the deterministic local enhancer.
  */
-import { enhancePrompt, type EnhanceOptions } from "../shared/enhancer";
+import { enhancePrompt, type EnhanceOptions } from "./_lib/enhancer";
 
 type VercelRequest = {
   method?: string;

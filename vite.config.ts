@@ -1,6 +1,6 @@
 import { defineConfig, loadEnv, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
-import { enhancePrompt, type EnhanceOptions } from "./shared/enhancer.ts";
+import { enhancePrompt, type EnhanceOptions } from "./api/_lib/enhancer.ts";
 
 /**
  * Serves POST /api/ai during `vite dev` using the same enhancer logic as the

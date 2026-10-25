@@ -12,7 +12,7 @@ import {
   localEnhance,
   type EnhanceResult,
   type Option,
-} from "../../shared/enhancer";
+} from "../../api/_lib/enhancer";
 
 function ChipGroup({
   label,

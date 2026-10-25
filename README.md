@@ -86,7 +86,7 @@ npm run preview   # preview the production build
 ## 📁 Project layout
 
 ```
-shared/enhancer.ts        Prompt-enhancer logic shared by UI, dev server, and functions
+api/_lib/enhancer.ts  Prompt-enhancer logic shared by UI, dev server, and functions
 src/lib/registry.ts       Single source of truth: sections, tools, search
 src/routes/               Home, section pages, tool router
 src/tools/                One component per tool
