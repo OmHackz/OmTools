@@ -5,8 +5,9 @@ import {
   AGENT_OPTIONS,
   DESIGN_SYSTEM_OPTIONS,
   ENHANCE_TYPE_OPTIONS,
+  ENHANCER_MODEL_OPTIONS,
   FRAMEWORK_OPTIONS,
-  TARGET_MODEL_OPTIONS,
+  TARGET_CODER_OPTIONS,
   generateSystemPrompt,
   localEnhance,
   type EnhanceResult,
@@ -47,30 +48,39 @@ function ChipGroup({
 export function PromptEnhancer() {
   useSeo(
     "Prompt Enhancer — OmTools",
-    "Turn rough prompts into precise, structured prompts for any AI model, framework, or agent."
+    "Turn rough prompts into precise, structured prompts for any AI coding agent."
   );
 
   const [prompt, setPrompt] = useState("");
   const [agent, setAgent] = useState("general");
   const [framework, setFramework] = useState("none");
   const [designSystem, setDesignSystem] = useState("none");
-  const [targetModel, setTargetModel] = useState("any");
+  const [targetCoder, setTargetCoder] = useState("none");
   const [enhanceType, setEnhanceType] = useState("improve");
 
   const [customSystem, setCustomSystem] = useState("");
   const [customized, setCustomized] = useState(false);
-  const [showSystem, setShowSystem] = useState(false);
+
+  const [enhancerModel, setEnhancerModel] = useState("default");
+  const [customBaseUrl, setCustomBaseUrl] = useState("");
+  const [customModelName, setCustomModelName] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<EnhanceResult | null>(null);
   const [copied, setCopied] = useState(false);
 
   const generatedSystem = useMemo(
-    () => generateSystemPrompt({ agent, framework, designSystem, targetModel, enhanceType }),
-    [agent, framework, designSystem, targetModel, enhanceType]
+    () => generateSystemPrompt({ agent, framework, designSystem, targetCoder, enhanceType }),
+    [agent, framework, designSystem, targetCoder, enhanceType]
   );
 
   const effectiveSystem = customized ? customSystem : generatedSystem;
+
+  const isCustomProvider = enhancerModel === "custom";
+  const enhancerBaseUrl = isCustomProvider ? customBaseUrl.trim() : "";
+  const enhancerModelValue = isCustomProvider
+    ? customModelName.trim() || "custom"
+    : enhancerModel;
 
   const enhance = async () => {
     if (!prompt.trim() || loading) return;
@@ -81,9 +91,11 @@ export function PromptEnhancer() {
       agent,
       framework,
       designSystem,
-      targetModel,
+      targetCoder,
       enhanceType,
       systemPrompt: effectiveSystem,
+      enhancerModel: enhancerModelValue,
+      enhancerBaseUrl,
     };
     try {
       const response = await fetch("/api/ai", {
@@ -96,8 +108,6 @@ export function PromptEnhancer() {
       if (!data.enhancedPrompt) throw new Error("Empty response");
       setResult(data);
     } catch {
-      // Static hosting without functions, dev preview, or a temporary outage:
-      // fall back to the same deterministic enhancer used by the API.
       setResult({
         enhancedPrompt: localEnhance(payload),
         original: prompt,
@@ -149,24 +159,21 @@ export function PromptEnhancer() {
             onChange={setDesignSystem}
           />
           <ChipGroup
-            label="Target model"
-            value={targetModel}
-            options={TARGET_MODEL_OPTIONS}
-            onChange={setTargetModel}
+            label="Target coder"
+            value={targetCoder}
+            options={TARGET_CODER_OPTIONS}
+            onChange={setTargetCoder}
           />
         </div>
 
-        <details
-          className="pe-advanced"
-          onToggle={(e) => setShowSystem((e.currentTarget as HTMLDetailsElement).open)}
-        >
-          <summary>Advanced · system prompt</summary>
+        <details className="pe-advanced">
+          <summary>Advanced · system prompt &amp; enhancer model</summary>
           <div className="pe-advanced-body">
             <p className="pe-hint">
-              Generated from your selections. Edit it to take full control; reset to regenerate.
+              The system prompt is regenerated live as you change options above. Edit it to take full control.
             </p>
             <textarea
-              value={showSystem ? effectiveSystem : generatedSystem}
+              value={effectiveSystem}
               onChange={(e) => {
                 setCustomSystem(e.target.value);
                 setCustomized(true);
@@ -186,6 +193,51 @@ export function PromptEnhancer() {
               </button>
               <span className="mono pe-system-state">{customized ? "custom" : "auto-generated"}</span>
             </div>
+
+            <div className="pe-field">
+              <span className="pe-label mono">Enhancer model</span>
+              <select
+                value={enhancerModel}
+                onChange={(e) => setEnhancerModel(e.target.value)}
+              >
+                {ENHANCER_MODEL_OPTIONS.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <p className="pe-hint">
+                Which model rewrites your prompt. "Server default" uses the server's <code className="mono">AI_MODEL</code>.
+              </p>
+            </div>
+
+            {isCustomProvider ? (
+              <div className="pe-custom-provider">
+                <div className="pe-field">
+                  <span className="pe-label mono">Custom base URL</span>
+                  <input
+                    type="text"
+                    value={customBaseUrl}
+                    onChange={(e) => setCustomBaseUrl(e.target.value)}
+                    placeholder="https://api.example.com/v1"
+                    spellCheck={false}
+                  />
+                </div>
+                <div className="pe-field">
+                  <span className="pe-label mono">Custom model name</span>
+                  <input
+                    type="text"
+                    value={customModelName}
+                    onChange={(e) => setCustomModelName(e.target.value)}
+                    placeholder="model-id"
+                    spellCheck={false}
+                  />
+                </div>
+                <p className="pe-hint">
+                  Uses the server's API key against your provider. The model name is sent as-is.
+                </p>
+              </div>
+            ) : null}
           </div>
         </details>
 

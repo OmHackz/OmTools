@@ -9,9 +9,13 @@ export interface EnhanceOptions {
   agent?: string;
   framework?: string;
   designSystem?: string;
-  targetModel?: string;
+  targetCoder?: string;
   enhanceType?: string;
   systemPrompt?: string;
+  /** Which model should perform the enhancement (server-side). */
+  enhancerModel?: string;
+  /** Custom OpenAI-compatible base URL for the enhancer (server-side). */
+  enhancerBaseUrl?: string;
 }
 
 export interface EnhanceResult {
@@ -44,12 +48,35 @@ export const FRAMEWORK_OPTIONS: Option[] = [
   { id: "vue", label: "Vue" },
   { id: "nuxt", label: "Nuxt" },
   { id: "svelte", label: "Svelte" },
+  { id: "sveltekit", label: "SvelteKit" },
   { id: "angular", label: "Angular" },
   { id: "astro", label: "Astro" },
+  { id: "solid", label: "SolidJS" },
+  { id: "qwik", label: "Qwik" },
+  { id: "remix", label: "Remix" },
+  { id: "tanstack", label: "TanStack Start" },
+  { id: "htmx", label: "HTMX" },
+  { id: "alpine", label: "Alpine.js" },
+  { id: "lit", label: "Lit" },
+  { id: "webcomponents", label: "Web Components" },
+  { id: "express", label: "Express" },
+  { id: "fastify", label: "Fastify" },
+  { id: "hono", label: "Hono" },
+  { id: "nestjs", label: "NestJS" },
+  { id: "elysia", label: "Elysia" },
   { id: "django", label: "Django" },
+  { id: "fastapi", label: "FastAPI" },
+  { id: "flask", label: "Flask" },
   { id: "rails", label: "Rails" },
   { id: "laravel", label: "Laravel" },
+  { id: "spring", label: "Spring Boot" },
+  { id: "dotnet", label: ".NET" },
+  { id: "gin", label: "Gin (Go)" },
   { id: "flutter", label: "Flutter" },
+  { id: "reactnative", label: "React Native" },
+  { id: "expo", label: "Expo" },
+  { id: "tauri", label: "Tauri" },
+  { id: "electron", label: "Electron" },
   { id: "plain", label: "HTML/CSS" },
 ];
 
@@ -64,18 +91,43 @@ export const DESIGN_SYSTEM_OPTIONS: Option[] = [
   { id: "radix", label: "Radix" },
   { id: "fluent", label: "Fluent" },
   { id: "carbon", label: "Carbon" },
+  { id: "daisyui", label: "DaisyUI" },
+  { id: "mantine", label: "Mantine" },
+  { id: "radixthemes", label: "Radix Themes" },
+  { id: "spectrum", label: "Spectrum" },
+  { id: "evergreen", label: "Evergreen" },
+  { id: "grommet", label: "Grommet" },
+  { id: "themeui", label: "Theme UI" },
+  { id: "parkui", label: "Park UI" },
+  { id: "magicui", label: "Magic UI" },
+  { id: "aceternity", label: "Aceternity" },
+  { id: "nextui", label: "NextUI/HeroUI" },
+  { id: "daisy", label: "Daisy" },
+  { id: "flowbite", label: "Flowbite" },
+  { id: "preline", label: "Preline" },
 ];
 
-export const TARGET_MODEL_OPTIONS: Option[] = [
-  { id: "any", label: "Any model" },
-  { id: "gpt-4o", label: "GPT-4o" },
-  { id: "gpt-4.1", label: "GPT-4.1" },
-  { id: "o3", label: "o3" },
-  { id: "claude", label: "Claude" },
-  { id: "gemini", label: "Gemini" },
-  { id: "llama", label: "Llama" },
-  { id: "deepseek", label: "DeepSeek" },
-  { id: "mistral", label: "Mistral" },
+export const TARGET_CODER_OPTIONS: Option[] = [
+  { id: "none", label: "Any / Generic" },
+  { id: "opencode", label: "OpenCode" },
+  { id: "claude-code", label: "Claude Code" },
+  { id: "cursor", label: "Cursor" },
+  { id: "copilot", label: "GitHub Copilot" },
+  { id: "windsurf", label: "Windsurf" },
+  { id: "cline", label: "Cline" },
+  { id: "aider", label: "Aider" },
+  { id: "continue", label: "Continue" },
+  { id: "tabnine", label: "Tabnine" },
+  { id: "codeium", label: "Codeium" },
+  { id: "amazon-q", label: "Amazon Q" },
+  { id: "cody", label: "Sourcegraph Cody" },
+  { id: "bolt", label: "Bolt.new" },
+  { id: "v0", label: "v0" },
+  { id: "lovable", label: "Lovable" },
+  { id: "replit", label: "Replit" },
+  { id: "aider-cli", label: "Aider CLI" },
+  { id: "gemini-cli", label: "Gemini CLI" },
+  { id: "codex", label: "OpenAI Codex" },
 ];
 
 export const ENHANCE_TYPE_OPTIONS: Option[] = [
@@ -90,6 +142,30 @@ export const ENHANCE_TYPE_OPTIONS: Option[] = [
   { id: "steps", label: "Step-by-step" },
 ];
 
+export const ENHANCER_MODEL_OPTIONS: Option[] = [
+  { id: "default", label: "Server default" },
+  { id: "gpt-4o", label: "GPT-4o" },
+  { id: "gpt-4o-mini", label: "GPT-4o mini" },
+  { id: "gpt-4.1", label: "GPT-4.1" },
+  { id: "gpt-4.1-mini", label: "GPT-4.1 mini" },
+  { id: "o3", label: "o3" },
+  { id: "o4-mini", label: "o4-mini" },
+  { id: "claude-3.5-sonnet", label: "Claude 3.5 Sonnet" },
+  { id: "claude-3.7-sonnet", label: "Claude 3.7 Sonnet" },
+  { id: "claude-4-sonnet", label: "Claude 4 Sonnet" },
+  { id: "claude-4-opus", label: "Claude 4 Opus" },
+  { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash" },
+  { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
+  { id: "gemini-2.5-pro", label: "Gemini 2.5 Pro" },
+  { id: "llama-4-maverick", label: "Llama 4 Maverick" },
+  { id: "llama-4-scout", label: "Llama 4 Scout" },
+  { id: "deepseek-v3", label: "DeepSeek V3" },
+  { id: "deepseek-r1", label: "DeepSeek R1" },
+  { id: "mistral-large", label: "Mistral Large" },
+  { id: "qwen-3", label: "Qwen 3" },
+  { id: "custom", label: "Custom provider" },
+];
+
 const AGENT_DESCRIPTIONS: Record<string, string> = {
   general: "general-purpose",
   research: "research (academic rigor, methodology, citations)",
@@ -100,6 +176,29 @@ const AGENT_DESCRIPTIONS: Record<string, string> = {
   data: "data analysis (statistics, SQL, visualization)",
   product: "product management (requirements, priorities, tradeoffs)",
   education: "teaching (clear explanations, examples, scaffolding)",
+};
+
+const CODER_DESCRIPTIONS: Record<string, string> = {
+  "none": "any AI coding assistant",
+  "opencode": "OpenCode (terminal-first coding agent with tool use)",
+  "claude-code": "Claude Code (Anthropic's agentic coding CLI)",
+  "cursor": "Cursor (AI-first IDE with Composer)",
+  "copilot": "GitHub Copilot (inline completion + chat)",
+  "windsurf": "Windsurf (agentic IDE with Cascade)",
+  "cline": "Cline (autonomous coding agent in VS Code)",
+  "aider": "Aider (terminal pair-programming)",
+  "continue": "Continue (open-source coding assistant)",
+  "tabnine": "Tabnine (privacy-focused completion)",
+  "codeium": "Codeium (fast completion + chat)",
+  "amazon-q": "Amazon Q Developer",
+  "cody": "Sourcegraph Cody (codebase-aware)",
+  "bolt": "Bolt.new (full-stack app generation)",
+  "v0": "v0 (UI component generation)",
+  "lovable": "Lovable (full-stack app generation)",
+  "replit": "Replit Agent",
+  "aider-cli": "Aider CLI",
+  "gemini-cli": "Gemini CLI",
+  "codex": "OpenAI Codex",
 };
 
 const STYLE_INSTRUCTIONS: Record<string, string> = {
@@ -127,7 +226,7 @@ function styleOf(id: string | undefined): string {
 
 /** Build the default system prompt shown in the Advanced section. */
 export function generateSystemPrompt(
-  input: Pick<EnhanceOptions, "agent" | "framework" | "designSystem" | "targetModel" | "enhanceType">
+  input: Pick<EnhanceOptions, "agent" | "framework" | "designSystem" | "targetCoder" | "enhanceType">
 ): string {
   const agent = labelOf(AGENT_OPTIONS, input.agent, "General");
   const agentDesc =
@@ -136,14 +235,18 @@ export function generateSystemPrompt(
   const targetLines: string[] = [];
   const framework = labelOf(FRAMEWORK_OPTIONS, input.framework, "None");
   const designSystem = labelOf(DESIGN_SYSTEM_OPTIONS, input.designSystem, "None");
-  const targetModel = labelOf(TARGET_MODEL_OPTIONS, input.targetModel, "Any model");
+  const targetCoder = labelOf(TARGET_CODER_OPTIONS, input.targetCoder, "Any / Generic");
+  const coderDesc =
+    CODER_DESCRIPTIONS[input.targetCoder ?? "none"] ?? CODER_DESCRIPTIONS.none;
 
   if (framework !== "None") targetLines.push(`- Framework: ${framework}`);
   if (designSystem !== "None") targetLines.push(`- Design system: ${designSystem}`);
-  if (targetModel !== "Any model") targetLines.push(`- Target model: ${targetModel}`);
+  if (targetCoder !== "Any / Generic") {
+    targetLines.push(`- Target coding agent: ${targetCoder} (${coderDesc})`);
+  }
 
   return [
-    "You are an expert prompt engineer. Your job is to rewrite the user's rough prompt into a precise, high-quality prompt that gets better results from AI models.",
+    "You are an expert prompt engineer. Your job is to rewrite the user's rough prompt into a precise, high-quality prompt that gets better results from AI coding agents.",
     "",
     `The enhanced prompt will be used by a ${agent} assistant (${agentDesc}).`,
     "",
@@ -156,7 +259,8 @@ export function generateSystemPrompt(
     "3. Remove ambiguity, filler, and contradictory instructions.",
     "4. Prefer concrete requirements over vague adjectives.",
     "5. Include an output format when the task has a clear deliverable.",
-    "6. Return only the enhanced prompt. Do not add explanations, preambles, or wrap the answer in code fences.",
+    "6. Tailor the prompt to the conventions and capabilities of the target coding agent when one is specified.",
+    "7. Return only the enhanced prompt. Do not add explanations, preambles, or wrap the answer in code fences.",
   ].join("\n");
 }
 
@@ -168,7 +272,7 @@ export function buildUserMessage(input: EnhanceOptions): string {
     `Agent: ${labelOf(AGENT_OPTIONS, input.agent, "General")}`,
     `Framework: ${labelOf(FRAMEWORK_OPTIONS, input.framework, "None")}`,
     `Design system: ${labelOf(DESIGN_SYSTEM_OPTIONS, input.designSystem, "None")}`,
-    `Target model: ${labelOf(TARGET_MODEL_OPTIONS, input.targetModel, "Any model")}`,
+    `Target coding agent: ${labelOf(TARGET_CODER_OPTIONS, input.targetCoder, "Any / Generic")}`,
     `Enhancement style: ${labelOf(ENHANCE_TYPE_OPTIONS, input.enhanceType, "Improve")}`,
     "",
     "Original prompt:",
@@ -185,13 +289,13 @@ export function localEnhance(input: EnhanceOptions): string {
   const agent = labelOf(AGENT_OPTIONS, input.agent, "General");
   const framework = labelOf(FRAMEWORK_OPTIONS, input.framework, "None");
   const designSystem = labelOf(DESIGN_SYSTEM_OPTIONS, input.designSystem, "None");
-  const targetModel = labelOf(TARGET_MODEL_OPTIONS, input.targetModel, "Any model");
+  const targetCoder = labelOf(TARGET_CODER_OPTIONS, input.targetCoder, "Any / Generic");
   const type = input.enhanceType ?? "improve";
 
   const context: string[] = [];
   if (framework !== "None") context.push(`Framework: ${framework}`);
   if (designSystem !== "None") context.push(`Design system: ${designSystem}`);
-  if (targetModel !== "Any model") context.push(`Target model: ${targetModel}`);
+  if (targetCoder !== "Any / Generic") context.push(`Target coding agent: ${targetCoder}`);
 
   const role = `You are a ${agent} assistant.`;
   const contextBlock = context.length > 0 ? ["Context:", ...context.map((c) => `- ${c}`)] : [];
@@ -307,6 +411,10 @@ type Env = Record<string, string | undefined>;
 /**
  * Enhance a prompt. Uses an OpenAI-compatible API when AI_API_KEY is set,
  * otherwise falls back to the deterministic local enhancer.
+ *
+ * enhancerModel / enhancerBaseUrl let the caller pick a specific model or
+ * provider; when omitted (or "default"/"custom" without a URL) the server's
+ * env values are used.
  */
 export async function enhancePrompt(
   input: EnhanceOptions,
@@ -320,8 +428,11 @@ export async function enhancePrompt(
     return { enhancedPrompt: localEnhance(input), original, fallback: true };
   }
 
-  const baseUrl = (env.AI_BASE_URL || "https://api.openai.com/v1").replace(/\/+$/, "");
-  const model = env.AI_MODEL || "gpt-4o-mini";
+  const requestedModel = input.enhancerModel && input.enhancerModel !== "default" ? input.enhancerModel : "";
+  const requestedUrl = input.enhancerBaseUrl && input.enhancerBaseUrl.trim() ? input.enhancerBaseUrl.trim() : "";
+
+  const model = requestedModel && requestedModel !== "custom" ? requestedModel : (env.AI_MODEL || "gpt-4o-mini");
+  const baseUrl = (requestedUrl || env.AI_BASE_URL || "https://api.openai.com/v1").replace(/\/+$/, "");
   const system = input.systemPrompt?.trim() || generateSystemPrompt(input);
 
   try {
