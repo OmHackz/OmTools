@@ -16,6 +16,8 @@ export interface EnhanceOptions {
   enhancerModel?: string;
   /** Custom OpenAI-compatible base URL for the enhancer (server-side). */
   enhancerBaseUrl?: string;
+  /** API key for a custom provider (provided by the user). */
+  enhancerApiKey?: string;
 }
 
 export interface EnhanceResult {
@@ -144,25 +146,6 @@ export const ENHANCE_TYPE_OPTIONS: Option[] = [
 
 export const ENHANCER_MODEL_OPTIONS: Option[] = [
   { id: "default", label: "Server default" },
-  { id: "gpt-4o", label: "GPT-4o" },
-  { id: "gpt-4o-mini", label: "GPT-4o mini" },
-  { id: "gpt-4.1", label: "GPT-4.1" },
-  { id: "gpt-4.1-mini", label: "GPT-4.1 mini" },
-  { id: "o3", label: "o3" },
-  { id: "o4-mini", label: "o4-mini" },
-  { id: "claude-3.5-sonnet", label: "Claude 3.5 Sonnet" },
-  { id: "claude-3.7-sonnet", label: "Claude 3.7 Sonnet" },
-  { id: "claude-4-sonnet", label: "Claude 4 Sonnet" },
-  { id: "claude-4-opus", label: "Claude 4 Opus" },
-  { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash" },
-  { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
-  { id: "gemini-2.5-pro", label: "Gemini 2.5 Pro" },
-  { id: "llama-4-maverick", label: "Llama 4 Maverick" },
-  { id: "llama-4-scout", label: "Llama 4 Scout" },
-  { id: "deepseek-v3", label: "DeepSeek V3" },
-  { id: "deepseek-r1", label: "DeepSeek R1" },
-  { id: "mistral-large", label: "Mistral Large" },
-  { id: "qwen-3", label: "Qwen 3" },
   { id: "custom", label: "Custom provider" },
 ];
 
@@ -423,16 +406,36 @@ export async function enhancePrompt(
   const original = input.prompt?.trim() ?? "";
   if (!original) return { enhancedPrompt: "", original, fallback: true };
 
-  const apiKey = env.AI_API_KEY || env.OPENAI_API_KEY || "";
-  if (!apiKey) {
-    return { enhancedPrompt: localEnhance(input), original, fallback: true };
+  const requestedUrl = input.enhancerBaseUrl && input.enhancerBaseUrl.trim() ? input.enhancerBaseUrl.trim() : "";
+  const requestedKey = input.enhancerApiKey && input.enhancerApiKey.trim() ? input.enhancerApiKey.trim() : "";
+  const isCustom = !!requestedUrl || !!requestedKey || input.enhancerModel === "custom";
+
+  let apiKey: string;
+  let baseUrl: string;
+  let model: string;
+
+  if (isCustom) {
+    // Custom provider: requires the user's own API key + base URL
+    if (!requestedUrl || !requestedKey) {
+      return { enhancedPrompt: localEnhance(input), original, fallback: true };
+    }
+    apiKey = requestedKey;
+    baseUrl = requestedUrl.replace(/\/+$/, "");
+    // Model name: use the user-provided name, or fall back to server default
+    model = (input.enhancerModel && input.enhancerModel !== "custom" && input.enhancerModel !== "default")
+      ? input.enhancerModel
+      : (env.AI_MODEL || "gpt-4o-mini");
+  } else {
+    // Server default: use server env vars
+    const serverKey = env.AI_API_KEY || env.OPENAI_API_KEY || "";
+    if (!serverKey) {
+      return { enhancedPrompt: localEnhance(input), original, fallback: true };
+    }
+    apiKey = serverKey;
+    baseUrl = (env.AI_BASE_URL || "https://api.openai.com/v1").replace(/\/+$/, "");
+    model = env.AI_MODEL || "gpt-4o-mini";
   }
 
-  const requestedModel = input.enhancerModel && input.enhancerModel !== "default" ? input.enhancerModel : "";
-  const requestedUrl = input.enhancerBaseUrl && input.enhancerBaseUrl.trim() ? input.enhancerBaseUrl.trim() : "";
-
-  const model = requestedModel && requestedModel !== "custom" ? requestedModel : (env.AI_MODEL || "gpt-4o-mini");
-  const baseUrl = (requestedUrl || env.AI_BASE_URL || "https://api.openai.com/v1").replace(/\/+$/, "");
   const system = input.systemPrompt?.trim() || generateSystemPrompt(input);
 
   try {

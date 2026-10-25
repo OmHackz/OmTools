@@ -64,6 +64,7 @@ export function PromptEnhancer() {
   const [enhancerModel, setEnhancerModel] = useState("default");
   const [customBaseUrl, setCustomBaseUrl] = useState("");
   const [customModelName, setCustomModelName] = useState("");
+  const [customApiKey, setCustomApiKey] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<EnhanceResult | null>(null);
@@ -81,6 +82,7 @@ export function PromptEnhancer() {
   const enhancerModelValue = isCustomProvider
     ? customModelName.trim() || "custom"
     : enhancerModel;
+  const enhancerApiKey = isCustomProvider ? customApiKey.trim() : "";
 
   const enhance = async () => {
     if (!prompt.trim() || loading) return;
@@ -96,6 +98,7 @@ export function PromptEnhancer() {
       systemPrompt: effectiveSystem,
       enhancerModel: enhancerModelValue,
       enhancerBaseUrl,
+      enhancerApiKey,
     };
     try {
       const response = await fetch("/api/ai", {
@@ -207,7 +210,7 @@ export function PromptEnhancer() {
                 ))}
               </select>
               <p className="pe-hint">
-                Which model rewrites your prompt. "Server default" uses the server's <code className="mono">AI_MODEL</code>.
+                "Server default" uses the server's configured AI. "Custom provider" requires your own base URL, model name, and API key.
               </p>
             </div>
 
@@ -233,8 +236,19 @@ export function PromptEnhancer() {
                     spellCheck={false}
                   />
                 </div>
+                <div className="pe-field">
+                  <span className="pe-label mono">Custom API key</span>
+                  <input
+                    type="password"
+                    value={customApiKey}
+                    onChange={(e) => setCustomApiKey(e.target.value)}
+                    placeholder="sk-..."
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                </div>
                 <p className="pe-hint">
-                  Uses the server's API key against your provider. The model name is sent as-is.
+                  Your key is sent to the server for this request only and is not stored. Required for custom providers.
                 </p>
               </div>
             ) : null}
